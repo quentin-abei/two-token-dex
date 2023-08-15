@@ -95,7 +95,13 @@ contract AMM {
     {
         _amountShitcoin = getSwapWethEstimate(_amountWeth);
         require(
-            
+            weth.allowance(msg.sender, address(this)) >= _amountWeth,
+            "Insufficient allowance"
         );
+
+        weth.transferFrom(msg.sender, address(this), _amountWeth);
+        totalShitcoin += _amountWeth;
+        totalShitcoin -= _amountShitcoin;
+        shitcoin.transfer(msg.sender, _amountShitcoin);
     } 
 }
