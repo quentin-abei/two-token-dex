@@ -9,7 +9,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract AMM {
    WETH private weth;
    SHITCOIN private shitcoin;
-*  using SafeMath for uint256;
+   using SafeMath for uint256;
    
    //amount of token1
    uint256 totalWeth;
@@ -25,8 +25,8 @@ contract AMM {
    mapping (address => uint256) public shares;
 
    constructor(
-        address _weth,
-        address _shitcoin
+        WETH _weth,
+        SHITCOIN _shitcoin
         ) {
         weth = _weth;
         shitcoin = _shitcoin;
@@ -37,10 +37,9 @@ contract AMM {
         _;
     }
 
-    modifier isValidAmount(address _token , uint256 _amount) {
-        IERC20 token = IERC20(_token);
+    modifier isValidAmount(IERC20 _token , uint256 _amount) {
         require(_amount > 0, "Amount cannot be zero");
-        require(_amount <= token.balanceOf(msg.sender), "Insufficient amount");
+        require(_amount <= _token.balanceOf(msg.sender), "Insufficient amount");
         _;
     }
 
@@ -56,11 +55,11 @@ contract AMM {
     isValidAmount(shitcoin, _amountShitcoin)
     returns(uint256 share) {
         if (totalShares == 0) {
-            share = 100.mul(WEI_VALUE);
+            share = 100*(WEI_VALUE);
         } else {
             uint256 share1 = totalShares.mul(_amountWeth.div(totalWeth));
             uint256 share2 = totalShares.mul(_amountShitcoin.div(totalShitcoin));
-            require(share1 == share2, "You must provide equals amount);
+            require(share1 == share2, "You must provide equals amount");
             share = share1;
         }
         require(share > 0, "Asset is less than treshold");
@@ -75,4 +74,28 @@ contract AMM {
         shares[msg.sender] += share;
     }
 
+    function getSwapWethEstimate(uint256 _amountWeth) 
+    public
+    view
+    isPoolActive
+    returns(uint256 _amountShitcoin)
+    {
+        uint256 wethAfter = totalWeth.add(_amountWeth);
+        uint256 shitcoinAfter = K.div(wethAfter);
+        _amountShitcoin = totalShitcoin.sub(shitcoinAfter);
+
+        if(_amountShitcoin == totalShitcoin) _amountShitcoin--;
+    } 
+
+    function swapWeth(uint256 _amountWeth)
+    external
+    isPoolActive
+    isValidAmount(weth, _amountWeth)
+    returns(uint256 _amountShitcoin)
+    {
+        _amountShitcoin = getSwapWethEstimate(_amountWeth);
+        require(
+            
+        );
+    } 
 }

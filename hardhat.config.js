@@ -1,4 +1,5 @@
 require("@nomicfoundation/hardhat-toolbox");
+require("dotenv").config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -9,7 +10,7 @@ module.exports = {
       accounts: [process.env.PRIVATE_KEY],
     },
     sepolia: {
-      url: process.env.SEPOLIA_URL;
+      url: process.env.SEPOLIA_URL,
       accounts: [process.env.PRIVATE_KEY],
     }
   },
