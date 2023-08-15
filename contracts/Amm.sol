@@ -104,4 +104,31 @@ contract AMM {
         totalShitcoin -= _amountShitcoin;
         shitcoin.transfer(msg.sender, _amountShitcoin);
     } 
+
+    function getSwapShitcoinEstimate(uint256 _amountShitcoin)
+    public
+    view
+    isPoolActive
+    returns(uint256 _amountWeth)
+    {
+        uint256 shitcoinAfter = totalShitcoin + _amountShitcoin;
+        uint256 wethAfter = K.div(shitcoinAfter);
+        _amountWeth = totalWeth.sub(wethAfter);
+
+        if (_amountWeth == totalWeth) _amountWeth--;
+    }
+
+    function swapShitcoin(uint256 _amountShitcoin)
+    external
+    isPoolActive
+    isValidAmount(shitcoin, _amountShitcoin)
+    returns(uint256 _amountWeth)
+    {
+        _amountWeth = getSwapWethEstimate(_amountShitcoin);
+
+        shitcoin.transferFrom(msg.sender, address(this), _amountShitcoin);
+        totalShitcoin += _amountShitcoin;
+        totalWeth -= _amountWeth;
+        weth.transfer(msg.sender, _amountWeth);
+    }
 }
