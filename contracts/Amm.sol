@@ -124,7 +124,7 @@ contract AMM {
     isValidAmount(shitcoin, _amountShitcoin)
     returns(uint256 _amountWeth)
     {
-        _amountWeth = getSwapWethEstimate(_amountShitcoin);
+        _amountWeth = getSwapShitcoinEstimate(_amountShitcoin);
 
         shitcoin.transferFrom(msg.sender, address(this), _amountShitcoin);
         totalShitcoin += _amountShitcoin;
