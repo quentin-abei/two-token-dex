@@ -74,6 +74,66 @@ contract AMM {
         shares[msg.sender] += share;
     }
 
+    function getHoldings(address user)
+    external
+    view
+    returns (
+        uint256 wethAmount,
+        uint256 shitcoinAmount,
+        uint256 userShare
+        )
+    {
+            wethAmount = weth.balanceOf(user);
+            shitcoinAmount = shitcoin.balanceOf(user);
+            userShare = shares[user];
+    }
+
+    function getEquivalentWethEstimate(uint256 _amountShitcoin)
+    public
+    view
+    isPoolActive
+    returns(uint256 eqWeth)
+    {
+        eqWeth = totalWeth.mul(_amountShitcoin.div(totalShitcoin));
+    }
+
+    function getEquivalentShitcoinEstimate(uint256 _amountWeth)
+    public
+    view
+    isPoolActive
+    returns(uint256 eqShitcoin)
+    {
+        eqShitcoin = totalShitcoin.mul(_amountWeth.div(totalWeth));
+    }
+
+    function getWithdrawEstimate(uint256 _share)
+    public
+    view
+    isPoolActive
+    returns(uint256 amountWeth, uint256 amountShitcoin)
+    {
+        require(_share <= shares[msg.sender], "Share should be less than total shares");
+        amountWeth = (_share.mul(totalWeth)).div(totalShares);
+        amountShitcoin = (_share.mul(totalShitcoin)).div(totalShares);
+    }
+
+    function withdraw(uint256 _share)
+    external
+    isPoolActive
+    isValidShares(_share)
+    returns(uint256 amountWeth, uint256 amountShitcoin)
+    {
+        (amountWeth, amountShitcoin) = getWithdrawEstimate(_share);
+        shares[msg.sender] -= _share;
+        totalShares -= _share;
+        totalWeth -=  amountWeth;
+        totalShitcoin -= amountShitcoin;
+        K = totalWeth.mul(totalShitcoin);
+
+        weth.transfer(msg.sender, amountWeth);
+        shitcoin.transfer(msg.sender, amountShitcoin);
+    }
+
     function getSwapWethEstimate(uint256 _amountWeth) 
     public
     view
